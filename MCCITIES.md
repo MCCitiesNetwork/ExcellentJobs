@@ -67,6 +67,13 @@ The probe also asserts that GovEducation account 41234 loses exactly 0.03.
 accounts, invalid amounts, and ledger rejection. The dedicated test account's
 starting grant is established separately before measuring payout deltas.
 
+Validated on 2026-10-26 with UniverseSpigot 26.3, NightCore 2.16.7 and
+TreasuryEconomy: all seven unit tests and GitHub CI passed, five existing jobs
+loaded, and the staging probe passed. Ledger transactions 10139710 and 10139711
+debited GovEducation (41234) by 0.01 and 0.02 and credited the test player by
+matching amounts, without SYSTEM postings. The temporary probe was removed.
+Production was inspected read-only; no production deployment was performed.
+
 Before replacing the plugin, stop the server and back up the old JAR and
 `plugins/ExcellentJobs/`. Install only one ExcellentJobs JAR and restart.
 This branch does not require a database migration.
