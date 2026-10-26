@@ -104,9 +104,9 @@ public class JobManager extends AbstractManager<JobsPlugin> {
         this.addListener(new JobGenericListener(this.plugin, this));
         this.addListener(new JobWorkstationListener(this.plugin, this));
 
-        // Use 1 second interval for "instant" payments to avoid currency plugin's API usage spam + keep it async.
+        // Currency providers and Bukkit payment events must run on the server thread.
         int paymentInterval = Config.isInstantPayment() ? 1 : Config.GENERAL_PAYMENT_INTERVAL.get();
-        this.addAsyncTask(this::payForJob, paymentInterval);
+        this.addTask(this::payForJob, paymentInterval);
 
         if (Config.GENERAL_PROGRESS_BAR_ENABLED.get()) {
             this.addAsyncTask(this::tickProgressBars, 1);
@@ -584,15 +584,16 @@ public class JobManager extends AbstractManager<JobsPlugin> {
         this.plugin.getPluginManager().callEvent(event);
         if (event.isCancelled()) return false;
 
-        // Send message only for scheduled payments.
+        JobIncome paid = income.payPending(player);
+        if (paid.isEmpty()) return false;
+
+        // Send message only for completed scheduled payments.
         if (!Config.isInstantPayment()) {
             Lang.JOB_PAYMENT_NOTIFY.message().send(player, replacer -> replacer
                 .replace(data.replaceAllPlaceholders())
-                .replace(Placeholders.GENERIC_AMOUNT, JobUtils.formatIncome(income))
+                .replace(Placeholders.GENERIC_AMOUNT, JobUtils.formatIncome(paid))
             );
         }
-
-        income.payAndClear(player);
 
         return true;
     }

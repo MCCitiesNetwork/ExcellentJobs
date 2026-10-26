@@ -2,10 +2,12 @@ package su.nightexpress.excellentjobs.job.impl;
 
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
+import su.nightexpress.excellentjobs.job.payment.CurrencyPayments;
 import su.nightexpress.nightcore.bridge.currency.Currency;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.BiPredicate;
 
 public class JobIncome {
 
@@ -16,21 +18,36 @@ public class JobIncome {
     }
 
     public void payAndClear(@NotNull Player player) {
-        this.pay(player);
-        this.clear();
+        this.payPending(player);
+    }
+
+    /** Pay each pending currency once, retaining rejected payments for a later attempt. */
+    public JobIncome payPending(@NotNull Player player) {
+        return this.payPending((currency, amount) -> CurrencyPayments.deposit(player, currency, amount));
+    }
+
+    synchronized JobIncome payPending(BiPredicate<Currency, Double> deposit) {
+        JobIncome paid = new JobIncome();
+        this.currencyMap.forEach((currency, amount) -> {
+            if (deposit.test(currency, amount)) {
+                this.reduce(currency, amount);
+                paid.add(currency, amount);
+            }
+        });
+        return paid;
     }
 
     public void pay(@NotNull Player player) {
         this.currencyMap.forEach((currency, amount) -> {
-            currency.give(player, amount);
+            CurrencyPayments.deposit(player, currency, amount);
         });
     }
 
-    public void clear() {
+    public synchronized void clear() {
         this.currencyMap.clear();
     }
 
-    public void set(@NotNull Currency currency, double amount) {
+    public synchronized void set(@NotNull Currency currency, double amount) {
         if (amount <= 0) {
             this.remove(currency);
             return;
@@ -39,7 +56,7 @@ public class JobIncome {
         this.currencyMap.put(currency, amount);
     }
 
-    public void add(@NotNull Currency currency, double amount) {
+    public synchronized void add(@NotNull Currency currency, double amount) {
         if (amount == 0) return;
 
         double has = this.currencyMap.getOrDefault(currency, 0D);
@@ -47,11 +64,11 @@ public class JobIncome {
         this.set(currency, has + amount);
     }
 
-    public void reduce(@NotNull Currency currency, double amount) {
+    public synchronized void reduce(@NotNull Currency currency, double amount) {
         this.add(currency, -amount);
     }
 
-    public void remove(@NotNull Currency currency) {
+    public synchronized void remove(@NotNull Currency currency) {
         this.currencyMap.remove(currency);
     }
 

@@ -1,0 +1,5 @@
+name: ExcellentJobsPayoutProbe
+version: 1.0
+main: dev.mccities.excellentjobs.probe.PayoutProbe
+api-version: '26.3'
+depend: [ExcellentJobs, nightcore, Vault, Treasury]
