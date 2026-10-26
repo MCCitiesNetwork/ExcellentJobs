@@ -70,6 +70,9 @@ public final class PayoutProbe extends JavaPlugin implements Listener {
             check(vault != null, "NightCore Vault currency available");
             Job job = jobs.getJobManager().getJobs().iterator().next();
             JobIncome income = user.getData(job).getIncome();
+            // Account creation may seed Treasury's configured starting balance.
+            // Establish that fixture before measuring the job payment delta.
+            if (!economy.hasAccount(player)) economy.createPlayerAccount(player);
             double before = economy.getBalance(player);
 
             income.set(vault, 0.01);
