@@ -49,10 +49,9 @@ payment events. Each run intentionally credits the dedicated test identity
 `2daf1841-94bf-4b9f-9a9f-6b84e5044321` with 0.03 in staging. Never install the probe
 on production. It disables itself after running; remove its JAR afterwards.
 
-The probe is not included in the release JAR. Compile it separately against the
-built plugin, NightCore, Vault and the server libraries, and package it with the
-provided `integration-test/plugin.yml`. It reports `PAYOUT_PROBE_PASS` or
-`PAYOUT_PROBE_FAIL` in the server log.
+The probe is not included in the release JAR. After the normal build, run
+`bash scripts/build-probe.sh` to produce `target/ExcellentJobsPayoutProbe.jar`.
+It reports `PAYOUT_PROBE_PASS` or `PAYOUT_PROBE_FAIL` in the server log.
 
 Before replacing the plugin, stop the server and back up the old JAR and
 `plugins/ExcellentJobs/`. Install only one ExcellentJobs JAR and restart.
