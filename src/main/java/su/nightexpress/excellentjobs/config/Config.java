@@ -40,6 +40,10 @@ public class Config {
         true,
         "Sets whether or not '/jobs menu' command is set as default plugin command instead of '/jobs help' one.");
 
+    public static final ConfigValue<String> GENERAL_PAYMENT_GOVERNMENT_ACCOUNT = ConfigValue.create(
+        "General.Payment.Government_Account", "GovEducation",
+        "Treasury government account funding Vault job payouts. Missing or unavailable accounts reject payment.");
+
     public static final ConfigValue<Boolean> GENERAL_PAYMENT_INSTANT = ConfigValue.create("General.Payment.Instant",
         false,
         "Controls whether players get payments for their work (job objectives) instantly without a delay (interval)."

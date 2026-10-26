@@ -6,7 +6,7 @@
 
     <groupId>su.nightexpress.excellentjobs</groupId>
     <artifactId>ExcellentJobs</artifactId>
-    <version>1.15.2-mccities.1</version>
+    <version>1.15.2-mccities.2</version>
 
     <properties>
         <maven.compiler.release>25</maven.compiler.release>
@@ -21,6 +21,11 @@
     </distributionManagement>
 
     <repositories>
+        <repository>
+            <id>treasury-snapshots</id>
+            <url>https://repo.paradaux.io/snapshots</url>
+            <snapshots><enabled>true</enabled></snapshots>
+        </repository>
 
         <repository>
             <id>papermc</id>
@@ -70,6 +75,12 @@
     </repositories>
 
     <dependencies>
+        <dependency>
+            <groupId>io.paradaux</groupId>
+            <artifactId>treasury-api</artifactId>
+            <version>2.3.0-20261026.133954-56</version>
+            <scope>provided</scope>
+        </dependency>
         <dependency>
             <groupId>com.github.MilkBowl</groupId>
             <artifactId>VaultAPI</artifactId>

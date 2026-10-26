@@ -1,5 +1,7 @@
 package dev.mccities.excellentjobs.probe;
 
+import io.paradaux.treasury.api.TreasuryApi;
+import su.nightexpress.excellentjobs.config.Config;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -74,6 +76,10 @@ public final class PayoutProbe extends JavaPlugin implements Listener {
             // Establish that fixture before measuring the job payment delta.
             if (!economy.hasAccount(player)) economy.createPlayerAccount(player);
             double before = economy.getBalance(player);
+            TreasuryApi treasury = Bukkit.getServicesManager().load(TreasuryApi.class);
+            var source = treasury.getGovernmentAccountByName(Config.GENERAL_PAYMENT_GOVERNMENT_ACCOUNT.get());
+            check(source != null && source.getAccountId() == 41234, "GovEducation funding account");
+            var sourceBefore = treasury.getBalanceByAccountId(source.getAccountId());
 
             income.set(vault, 0.01);
             cancel = true;
@@ -99,6 +105,9 @@ public final class PayoutProbe extends JavaPlugin implements Listener {
             jobs.getJobManager().handleQuit(player);
             same(before + 0.03, economy.getBalance(player), "logout payout credited");
             check(income.isEmpty(), "logout income cleared");
+            check(sourceBefore.subtract(new java.math.BigDecimal("0.03"))
+                .compareTo(treasury.getBalanceByAccountId(source.getAccountId())) == 0,
+                "GovEducation debited exactly the credited total");
             check(events == 4, "four synchronous payment events observed");
             getLogger().info("PAYOUT_PROBE_PASS server=" + Bukkit.getVersion() + " plugin=" + jobs.getPluginMeta().getVersion()
                 + " provider=" + economy.getName() + " before=" + before + " after=" + economy.getBalance(player));

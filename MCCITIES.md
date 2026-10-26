@@ -6,12 +6,21 @@ ExcellentJobs 2.x migration.
 
 The installed legacy custom build called `EconomyBridge.getVaultDebitAccountId()`.
 That method is absent from NightCore 2.16.7 and is not part of upstream 1.15.2.
-This branch uses the registered Vault economy provider for money payouts. With
-Treasury, deposits are funded by the calling plugin's system account; the old
-NightCore `Integration.Economy.Vault.DebitAccount` setting is not used.
+This branch funds Vault job payouts from Treasury's government account named
+`GovEducation` (production account 41234), preserving the legacy funding source.
+Set `General.Payment.Government_Account` in ExcellentJobs config to change the
+government account name. The old NightCore
+`Integration.Economy.Vault.DebitAccount` setting is not used.
+
+Treasury is required. Each payout uses one atomic government-to-player transfer,
+tagged `ExcellentJobs` in the ledger. It does not route through a SYSTEM account.
+Missing or archived funding accounts and rejected transfers leave income pending;
+there is no fallback funding source. Treasury enforces account authorization and
+overdraft policy. Amounts below one cent are rejected; other amounts are rounded
+to two decimal places using HALF_EVEN, matching Treasury's Vault adapter.
 
 Scheduled payouts now execute on the server thread, as do their payment events.
-Vault rejection leaves the amount pending, successful currencies are removed
+Treasury rejection leaves the amount pending, successful currencies are removed
 individually, and payment notifications describe only successful credits.
 Pending income remains in memory, following the 1.15.2 data model; this change
 is not a durable payment queue. Non-Vault currencies retain NightCore's void
@@ -33,7 +42,7 @@ Maven coordinates no longer resolve reliably. It preserves the optional
 LevelledMobs, EvenMoreFish and ProtocolLib integrations. Downloaded JARs stay
 under `.context/`; they are not bundled in the plugin or committed.
 
-Output: `target/ExcellentJobs-1.15.2-mccities.1.jar`.
+Output: `target/ExcellentJobs-1.15.2-mccities.2.jar`.
 
 ## Verification
 
@@ -53,11 +62,10 @@ The probe is not included in the release JAR. After the normal build, run
 `bash scripts/build-probe.sh` to produce `target/ExcellentJobsPayoutProbe.jar`.
 It reports `PAYOUT_PROBE_PASS` or `PAYOUT_PROBE_FAIL` in the server log.
 
-Validated on 2026-10-26 with UniverseSpigot 26.3, NightCore 2.16.7 and
-TreasuryEconomy: five existing jobs loaded, the probe passed, and the staging
-ledger showed matching ExcellentJobs SYSTEM debits and PERSONAL credits of 0.01
-and 0.02. The dedicated test account's starting grant was established separately
-before measuring payout deltas. The temporary probe was removed after testing.
+The probe also asserts that GovEducation account 41234 loses exactly 0.03.
+`CurrencyPaymentsTest` checks atomic government-to-player routing, invalid funding
+accounts, invalid amounts, and ledger rejection. The dedicated test account's
+starting grant is established separately before measuring payout deltas.
 
 Before replacing the plugin, stop the server and back up the old JAR and
 `plugins/ExcellentJobs/`. Install only one ExcellentJobs JAR and restart.
