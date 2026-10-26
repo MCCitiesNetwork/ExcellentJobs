@@ -53,6 +53,12 @@ The probe is not included in the release JAR. After the normal build, run
 `bash scripts/build-probe.sh` to produce `target/ExcellentJobsPayoutProbe.jar`.
 It reports `PAYOUT_PROBE_PASS` or `PAYOUT_PROBE_FAIL` in the server log.
 
+Validated on 2026-10-26 with UniverseSpigot 26.3, NightCore 2.16.7 and
+TreasuryEconomy: five existing jobs loaded, the probe passed, and the staging
+ledger showed matching ExcellentJobs SYSTEM debits and PERSONAL credits of 0.01
+and 0.02. The dedicated test account's starting grant was established separately
+before measuring payout deltas. The temporary probe was removed after testing.
+
 Before replacing the plugin, stop the server and back up the old JAR and
 `plugins/ExcellentJobs/`. Install only one ExcellentJobs JAR and restart.
 This branch does not require a database migration.
